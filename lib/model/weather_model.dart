@@ -1,11 +1,13 @@
+// ignore_for_file: non_constant_identifier_names
+
 class Weather {
   String? cityName;
   double? temp;
   double? wind;
   int? humidity;
   double? temp_max;
-  // String? icon;
-  // String? weather;
+  String? icon;
+  String? weather;
 
   Weather({
     this.cityName,
@@ -13,8 +15,8 @@ class Weather {
     this.wind,
     this.humidity,
     this.temp_max,
-    // this.icon,
-    // this.weather,
+    this.icon,
+    this.weather,
   });
   Weather.fromJson(Map<String, dynamic> json) {
     cityName = json["name"];
@@ -22,7 +24,7 @@ class Weather {
     wind = json["wind"]["speed"];
     humidity = json["main"]["humidity"];
     temp_max = json["main"]["temp_max"];
-    // icon = json["weather"]["icon"];
-    // weather = json["weather"]["main"];
+    icon = json["weather"][0]["icon"];
+    weather = json["weather"][0]["main"];
   }
 }

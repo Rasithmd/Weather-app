@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-import 'package:weather_app/bloc_screen.dart';
-import 'package:weather_app/model/weather_list.dart';
 import 'package:weather_app/model/weather_model.dart';
 import 'package:weather_app/services/weather_api_client.dart';
 import 'package:weather_app/widget/weather_item.dart';
@@ -15,6 +12,15 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  List<String> items = <String>[
+    'Manamadurai',
+    'Sivaganga',
+    'Ramanathapuram',
+    'Trichy',
+    'Chennai',
+    'Madurai',
+  ];
+
   final Shader linearGradient = const LinearGradient(
     colors: <Color>[Color(0xffABCFF2), Color(0xff9AC6F3)],
   ).createShader(const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
@@ -23,29 +29,60 @@ class _HomePageState extends State<HomePage> {
   Weather? data;
   DateTime todaydate = DateTime.now();
   String imageUrl = '';
-
-  Future<void> getData() async {
-    data = await client.getCurrentWeather("Ramanathapuram");
+  String location = 'Manamadurai';
+  Future<void> getData(String location) async {
+    data = await client.getCurrentWeather(location);
   }
 
-  List<WeatherListModel> listWeather = [];
+  @override
+  void initState() {
+    super.initState();
+    getData(location);
+  }
 
   @override
   Widget build(BuildContext context) {
-    listWeather = context.watch<WeatherListBloc>().list;
     Size size = MediaQuery.of(context).size;
-    context.read<WeatherListBloc>().loadData();
+
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: const Color.fromARGB(255, 58, 97, 128),
-          title: const Text(
-            "Weather",
+          // automaticallyImplyLeading: false,
+          backgroundColor: Colors.white,
+          centerTitle: false,
+          elevation: 0,
+          title: Row(
+            children: [
+              const SizedBox(
+                width: 150,
+              ),
+              Image.asset(
+                'assets/pin.png',
+                width: 20,
+              ),
+              const SizedBox(
+                width: 4,
+              ),
+              DropdownButtonHideUnderline(
+                child: DropdownButton(
+                    iconSize: 25,
+                    value: location,
+                    icon: const Icon(Icons.keyboard_arrow_down),
+                    items: items.map((e) {
+                      return DropdownMenuItem(value: e, child: Text(e));
+                    }).toList(),
+                    onChanged: (newValue) {
+                      setState(() {
+                        location = newValue!;
+                        getData(location);
+                      });
+                    }),
+              ),
+            ],
           ),
-          centerTitle: true,
         ),
         body: FutureBuilder(
-          future: getData(),
+          future: getData(location),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
               return Container(
@@ -88,12 +125,13 @@ class _HomePageState extends State<HomePage> {
                         clipBehavior: Clip.none,
                         children: [
                           Positioned(
-                            top: -40,
+                            top: -75,
                             left: 20,
                             child: imageUrl != ''
                                 ? const Text('')
                                 : Image.asset(
-                                    'assets/heavycloud.png',
+                                    // ignore: prefer_interpolation_to_compose_strings
+                                    'assets/icon/' + data!.icon! + ".png",
                                     width: 150,
                                   ),
                           ),
@@ -101,7 +139,7 @@ class _HomePageState extends State<HomePage> {
                             bottom: 30,
                             left: 20,
                             child: Text(
-                              listWeather[0].main!,
+                              data!.weather!.toString(),
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 20,
